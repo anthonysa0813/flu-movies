@@ -17,10 +17,24 @@ export const MoviesSlice = createSlice({
     },
     getMovies: (state, action) => {
       state.isLoading = false;
-      state.moviesData = action.payload.movies;
+      state.moviesData = [...state.moviesData, action.payload.movies];
+    },
+    editMovie: (state, action) => {
+      const movieFilter = state.moviesData.filter(
+        (m) => m.id !== action.payload.movies.id
+      );
+      console.log(movieFilter);
+    },
+    deleteMovie: (state, action) => {
+      const movieArr = state.moviesData.map(
+        (movie) => movie.id !== action.payload.id
+      );
+      console.log({ movieArr });
+      state.moviesData = movieArr;
     },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { startLoadingMovies, getMovies } = MoviesSlice.actions;
+export const { startLoadingMovies, deleteMovie, getMovies, editMovie } =
+  MoviesSlice.actions;

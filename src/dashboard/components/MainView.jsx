@@ -1,46 +1,27 @@
 import React, { useState, useEffect } from "react";
-import { Button, Table } from "antd";
+import { Button, Space, Table } from "antd";
 import { getMoviesThunk } from "../../store/slices/movies/thunks.js";
 import { useDispatch, useSelector } from "react-redux";
 import Modal from "./Modal";
+import Column from "antd/lib/table/Column.js";
+import { deleteMovie, editMovie } from "../../store/slices/moviesSlice.js";
 
 const MainView = () => {
   const {
     movies: { moviesData },
   } = useSelector((state) => state);
   const [showModal, setShowModal] = useState(false);
+  const [method, setMethod] = useState("get");
+
+  const [movieState, setMovieState] = useState({
+    nombre: "",
+    fecha: "",
+    estado: "",
+  });
 
   const dispatch = useDispatch();
   console.log(moviesData);
-  const dataSource = [];
-
-  const columns = [
-    {
-      title: "id",
-      dataIndex: "id",
-      key: "id",
-    },
-    {
-      title: "Nombre",
-      dataIndex: "Nombre",
-      key: "Nombre",
-    },
-    {
-      title: "F.publicación",
-      dataIndex: "F.publicación",
-      key: "F.publicación",
-    },
-    {
-      title: "Estado",
-      dataIndex: "Estado",
-      key: "Estado",
-    },
-    {
-      title: "",
-      dataIndex: "",
-      key: "",
-    },
-  ];
+  const dataSource = moviesData;
 
   useEffect(() => {
     dispatch(getMoviesThunk());
@@ -51,9 +32,21 @@ const MainView = () => {
     setShowModal(!showModal);
   };
 
+  const edit = (movie) => {
+    setShowModal(!showModal);
+    setMovieState(movie);
+    setMethod("edit");
+  };
+
   return (
     <>
-      {showModal && <Modal setShowModal={setShowModal} />}
+      {showModal && (
+        <Modal
+          setShowModal={setShowModal}
+          initialState={movieState}
+          method={method}
+        />
+      )}
       <main className="MainViewContainer">
         <div className="mainHead">
           <h3>Películas</h3>
@@ -61,12 +54,42 @@ const MainView = () => {
             Nueva
           </Button>
         </div>
-        <Table dataSource={dataSource} columns={columns} />;
-        <ul>
-          {/* {moviesData?.Search.map((movie) => (
-            <li>{movie.Title}</li>
-          ))} */}
-        </ul>
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">id</th>
+              <th scope="col">Nombre</th>
+              <th scope="col">F.publicación</th>
+              <th scope="col">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {dataSource.map((movie) => {
+              return (
+                <tr>
+                  <th scope="row">{movie.id}</th>
+                  <td>{movie.nombre}</td>
+                  <td>{movie.fecha}</td>
+                  <td>{movie.estado}</td>
+                  <td>
+                    <button
+                      className="btn btn-warning mx-2"
+                      onClick={() => edit(movie)}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => dispatch(deleteMovie(movie.id))}
+                    >
+                      Elminar
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </main>
     </>
   );
